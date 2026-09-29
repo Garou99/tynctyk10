@@ -75,6 +75,29 @@ function requireAuth(request, response, next) {
   next();
 }
 
+app.get('/api/ice-servers', requireAuth, async (_request, response) => {
+  const appName = String(process.env.METERED_APP_NAME || '').trim().toLowerCase();
+  const apiKey = process.env.METERED_API_KEY;
+  if (!/^[a-z0-9-]+$/.test(appName) || !apiKey) {
+    return response.status(503).json({ error: 'Видеосвязь не настроена: добавьте TURN-релей в настройки сервера.' });
+  }
+
+  try {
+    const url = `https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${encodeURIComponent(apiKey)}`;
+    const relayResponse = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!relayResponse.ok) throw new Error('TURN credentials request failed');
+    const iceServers = await relayResponse.json();
+    const hasTurnServer = Array.isArray(iceServers) && iceServers.some((iceServer) => {
+      const urls = Array.isArray(iceServer.urls) ? iceServer.urls : [iceServer.urls];
+      return urls.some((iceUrl) => typeof iceUrl === 'string' && /^turns?:/i.test(iceUrl));
+    });
+    if (!hasTurnServer) throw new Error('TURN server missing from response');
+    response.set('Cache-Control', 'no-store').json({ iceServers });
+  } catch {
+    response.status(502).json({ error: 'Не удалось получить TURN-настройки. Проверьте ключ видеорелея в Render.' });
+  }
+});
+
 function hashPassword(password) {
   return new Promise((resolve, reject) => {
     const salt = crypto.randomBytes(16).toString('hex');
