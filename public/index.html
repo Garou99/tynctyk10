@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101210">
+    <meta name="description" content="Случайный видеочат для взрослых пользователей.">
+    <title>Встреча — видеочат</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script src="/socket.io/socket.io.js" defer></script>
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <main id="authScreen" class="auth-screen">
+      <section class="auth-art" aria-label="Встреча">
+        <a class="brand brand-light" href="/" aria-label="Встреча, главная">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+          <span>встреча<span class="brand-dot">.</span></span>
+        </a>
+        <div class="art-copy">
+          <p class="eyebrow"><span class="live-dot"></span> МИР ЧУТЬ БЛИЖЕ</p>
+          <h1>Один разговор<br>может изменить<br><em>весь вечер.</em></h1>
+          <p class="art-description">Случайные встречи. Настоящие люди.<br>Только вы и следующий разговор.</p>
+        </div>
+        <div class="art-bottom"><span>01 — 01</span><span>ПОДКЛЮЧИСЬ К МИРУ</span></div>
+        <div class="art-orbit orbit-one" aria-hidden="true"></div>
+        <div class="art-orbit orbit-two" aria-hidden="true"></div>
+        <div class="art-stamp" aria-hidden="true">НАЙДИ<br>СВОИХ<br><span>↗</span></div>
+      </section>
+
+      <section class="auth-panel">
+        <div class="auth-panel-top"><span>ОНЛАЙН-ВСТРЕЧИ</span><span>18+</span></div>
+        <div class="auth-card">
+          <div class="auth-heading">
+            <p class="eyebrow">ТВОЯ СЛЕДУЮЩАЯ ИСТОРИЯ</p>
+            <h2 id="authTitle">Создать аккаунт</h2>
+            <p id="authSubtitle" class="muted">Это займёт всего минуту.</p>
+          </div>
+          <div class="auth-tabs" role="tablist" aria-label="Вход или регистрация">
+            <button class="auth-tab is-active" type="button" role="tab" aria-selected="true" data-auth-mode="register">Регистрация</button>
+            <button class="auth-tab" type="button" role="tab" aria-selected="false" data-auth-mode="login">Войти</button>
+          </div>
+          <form id="authForm" novalidate>
+            <div id="registerFields" class="form-grid">
+              <label class="field"><span>Имя</span><input name="firstName" autocomplete="given-name" maxlength="50" placeholder="Александр" required></label>
+              <label class="field"><span>Фамилия</span><input name="lastName" autocomplete="family-name" maxlength="50" placeholder="Иванов" required></label>
+              <label class="field field-wide"><span>Год рождения <small>только 18+</small></span><input name="birthYear" type="number" inputmode="numeric" autocomplete="bday-year" required></label>
+            </div>
+            <label class="field"><span>Gmail</span><input name="email" type="email" autocomplete="email" placeholder="you@gmail.com" required></label>
+            <label class="field"><span>Пароль</span><input name="password" type="password" autocomplete="new-password" minlength="8" placeholder="Не менее 8 символов" required></label>
+            <p id="authError" class="form-error" role="alert" hidden></p>
+            <button id="authSubmit" class="button button-dark button-wide" type="submit"><span>Создать аккаунт</span><span aria-hidden="true">↗</span></button>
+          </form>
+          <p class="legal-note">Продолжая, вы подтверждаете, что вам исполнилось 18 лет.</p>
+        </div>
+        <div class="auth-panel-footer"><span>СЛУЧАЙНЫЕ ВСТРЕЧИ, БЕЗ ГРАНИЦ</span><span>RU / EN</span></div>
+      </section>
+    </main>
+
+    <main id="chatScreen" class="chat-screen" hidden>
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Встреча, главная">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+          <span>встреча<span class="brand-dot">.</span></span>
+        </a>
+        <div class="topbar-center"><span class="live-dot"></span><span id="onlineCount">0</span><span>В СЕТИ</span></div>
+        <div class="topbar-user"><span id="userName"></span><button id="logoutButton" class="icon-button logout-button" type="button" title="Выйти" aria-label="Выйти">↗</button></div>
+      </header>
+
+      <section class="chat-layout">
+        <div class="chat-heading"><div><p class="eyebrow">СЛУЧАЙНЫЕ ВСТРЕЧИ <span>/</span> ВИДЕОЧАТ</p><h1>Кто там, за экраном?</h1></div><div class="secure-note"><span aria-hidden="true">◈</span> ЛИЧНЫЙ РАЗГОВОР</div></div>
+        <section class="video-stage" aria-label="Видеоразговор">
+          <div class="remote-video video-frame">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div id="remotePlaceholder" class="video-placeholder"><span class="placeholder-icon" aria-hidden="true">◌</span><span id="remoteStatus">Собеседник появится здесь</span></div>
+            <div class="video-label"><span class="live-dot"></span><span id="remoteLabel">НОВЫЙ СОБЕСЕДНИК</span></div>
+            <span class="video-index">01</span>
+          </div>
+          <div class="local-video video-frame">
+            <video id="localVideo" autoplay muted playsinline></video>
+            <div id="localPlaceholder" class="video-placeholder"><span class="placeholder-icon" aria-hidden="true">◎</span><span>Ваше видео</span></div>
+            <div class="video-label"><span class="local-dot"></span><span>ЭТО ВЫ</span></div>
+          </div>
+          <div class="connection-badge"><span class="connection-pulse"></span><span id="connectionStatus">ГОТОВЫ К ВСТРЕЧЕ</span></div>
+        </section>
+
+        <div class="control-row">
+          <div class="control-hint"><span class="hint-number">01</span><span>Каждая встреча — новая история.</span></div>
+          <div class="controls" aria-label="Управление звонком">
+            <button id="micButton" class="control-button" type="button" aria-label="Выключить микрофон" title="Выключить микрофон" disabled><span class="control-icon mic-icon" aria-hidden="true">♩</span><span id="micLabel">ЗВУК ВКЛ</span></button>
+            <button id="cameraButton" class="control-button" type="button" aria-label="Выключить камеру" title="Выключить камеру" disabled><span class="control-icon camera-icon" aria-hidden="true">▣</span><span id="cameraLabel">КАМЕРА ВКЛ</span></button>
+            <button id="nextButton" class="button button-accent next-button" type="button"><span id="nextLabel">Найти собеседника</span><span class="next-arrow" aria-hidden="true">→</span></button>
+          </div>
+          <div class="chat-count"><span id="meetingCount">00</span><span>ВСТРЕЧИ</span></div>
+        </div>
+        <footer class="chat-footer"><span>БУДЬТЕ ДОБРЫ ДРУГ К ДРУГУ</span><span>ПРЕРВАТЬ РАЗГОВОР МОЖНО В ЛЮБОЙ МОМЕНТ</span><span>18+</span></footer>
+      </section>
+    </main>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>
