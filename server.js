@@ -16,6 +16,8 @@ const sessionSecret = process.env.SESSION_SECRET || (process.env.NODE_ENV === 'p
 
 if (!sessionSecret) throw new Error('Set SESSION_SECRET before starting in production.');
 
+app.set('trust proxy', 1);
+
 fs.mkdirSync(dataDirectory, { recursive: true });
 if (!fs.existsSync(usersFile)) fs.writeFileSync(usersFile, '[]', 'utf8');
 
