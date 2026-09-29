@@ -6,6 +6,11 @@ const authTitle = document.querySelector('#authTitle');
 const authSubtitle = document.querySelector('#authSubtitle');
 const authSubmit = document.querySelector('#authSubmit');
 const authError = document.querySelector('#authError');
+const guestStartButton = document.querySelector('#guestStartButton');
+const guestFields = document.querySelector('#guestFields');
+const guestBirthYear = document.querySelector('#guestBirthYear');
+const guestError = document.querySelector('#guestError');
+const guestSubmitButton = document.querySelector('#guestSubmitButton');
 const toast = document.querySelector('#toast');
 const localVideo = document.querySelector('#localVideo');
 const remoteVideo = document.querySelector('#remoteVideo');
@@ -40,6 +45,7 @@ function showToast(message) {
 
 function updateAuthMode(mode) {
   authMode = mode;
+  guestFields.hidden = true;
   const isRegister = mode === 'register';
   registerFields.hidden = !isRegister;
   registerFields.querySelectorAll('input').forEach((input) => { input.required = isRegister; });
@@ -58,6 +64,12 @@ function updateAuthMode(mode) {
 
 document.querySelectorAll('[data-auth-mode]').forEach((tab) => {
   tab.addEventListener('click', () => updateAuthMode(tab.dataset.authMode));
+});
+
+guestStartButton.addEventListener('click', () => {
+  guestFields.hidden = !guestFields.hidden;
+  guestError.hidden = true;
+  if (!guestFields.hidden) guestBirthYear.focus();
 });
 
 function showChat(user) {
@@ -101,10 +113,31 @@ authForm.addEventListener('submit', async (event) => {
   }
 });
 
+guestSubmitButton.addEventListener('click', async () => {
+  guestError.hidden = true;
+  if (!guestBirthYear.reportValidity()) return;
+  guestSubmitButton.disabled = true;
+  try {
+    const result = await api('/api/guest', {
+      method: 'POST',
+      body: JSON.stringify({ birthYear: Number(guestBirthYear.value) }),
+    });
+    showChat(result.user);
+  } catch (error) {
+    guestError.textContent = error.message;
+    guestError.hidden = false;
+  } finally {
+    guestSubmitButton.disabled = false;
+  }
+});
+
 async function initialize() {
   const yearInput = authForm.elements.birthYear;
-  yearInput.max = String(new Date().getFullYear() - 18);
+  const latestAdultBirthYear = new Date().getFullYear() - 18;
+  yearInput.max = String(latestAdultBirthYear);
   yearInput.placeholder = String(new Date().getFullYear() - 25);
+  guestBirthYear.max = String(latestAdultBirthYear);
+  guestBirthYear.placeholder = String(new Date().getFullYear() - 25);
   try {
     const result = await api('/api/me');
     showChat(result.user);

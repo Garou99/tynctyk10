@@ -64,6 +64,11 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 .button-dark { background: var(--ink); color: white; }
 .button-dark:hover:not(:disabled) { background: #34372f; }
 .button-wide { width: 100%; margin-top: 4px; }
+.guest-link { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 17px; padding: 5px 0; border: 0; background: transparent; color: #66685f; font-size: 11px; font-weight: 600; cursor: pointer; }
+.guest-link span:last-child { color: #8c9760; font-size: 16px; }
+.guest-link:hover { color: var(--ink); }
+.guest-fields { margin-top: 7px; padding-top: 18px; border-top: 1px solid var(--line); }
+.guest-fields .field { margin-bottom: 10px; }
 .legal-note { margin: 15px 0 0; color: #93948c; font-size: 10px; line-height: 1.6; }
 .form-error { margin: -1px 0 13px; color: #bd4636; font-size: 11px; line-height: 1.5; }
 

@@ -54,7 +54,13 @@
             <p id="authError" class="form-error" role="alert" hidden></p>
             <button id="authSubmit" class="button button-dark button-wide" type="submit"><span>Создать аккаунт</span><span aria-hidden="true">↗</span></button>
           </form>
-          <p class="legal-note">Продолжая, вы подтверждаете, что вам исполнилось 18 лет.</p>
+          <button id="guestStartButton" class="guest-link" type="button"><span>Или войти без регистрации</span><span aria-hidden="true">↗</span></button>
+          <div id="guestFields" class="guest-fields" hidden>
+            <label class="field"><span>Год рождения <small>только 18+</small></span><input id="guestBirthYear" type="number" inputmode="numeric" min="1900" step="1" placeholder="Год рождения" required></label>
+            <p id="guestError" class="form-error" role="alert" hidden></p>
+            <button id="guestSubmitButton" class="button button-accent button-wide" type="button"><span>Войти как гость</span><span aria-hidden="true">↗</span></button>
+          </div>
+          <p class="legal-note">Видеочат доступен только пользователям от 18 лет.</p>
         </div>
         <div class="auth-panel-footer"><span>СЛУЧАЙНЫЕ ВСТРЕЧИ, БЕЗ ГРАНИЦ</span><span>RU / EN</span></div>
       </section>
