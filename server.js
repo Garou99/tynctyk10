@@ -44,7 +44,7 @@ app.get('/health', (_request, response) => {
 });
 
 function publicUser(user) {
-  return { firstName: user.firstName, lastName: user.lastName, birthYear: user.birthYear, email: user.email };
+  return { firstName: user.firstName, lastName: user.lastName, birthYear: user.birthYear, email: user.email, isGuest: Boolean(user.isGuest) };
 }
 
 function saveUserSession(request, response, user, status = 200) {
@@ -59,6 +59,10 @@ function saveUserSession(request, response, user, status = 200) {
 }
 
 function requireAuth(request, response, next) {
+  if (request.session.guestUser) {
+    request.user = request.session.guestUser;
+    return next();
+  }
   if (!request.session.userId) return response.status(401).json({ error: 'Войдите в аккаунт, чтобы продолжить.' });
   const user = readUsers().find((entry) => entry.id === request.session.userId);
   if (!user) {
@@ -144,6 +148,31 @@ app.post('/api/login', async (request, response) => {
   saveUserSession(request, response, user);
 });
 
+app.post('/api/guest', (request, response) => {
+  const birthYear = Number(request.body.birthYear);
+  const currentYear = new Date().getFullYear();
+  if (!Number.isInteger(birthYear) || birthYear < 1900 || birthYear > currentYear - 18) {
+    return response.status(400).json({ error: 'Видеочат доступен только пользователям от 18 лет.' });
+  }
+
+  const guestUser = {
+    id: crypto.randomUUID(),
+    firstName: `Гость ${crypto.randomInt(1000, 10000)}`,
+    lastName: '',
+    birthYear,
+    email: '',
+    isGuest: true,
+  };
+  request.session.regenerate((regenerateError) => {
+    if (regenerateError) return response.status(500).json({ error: 'Не удалось создать сессию.' });
+    request.session.guestUser = guestUser;
+    request.session.save((saveError) => {
+      if (saveError) return response.status(500).json({ error: 'Не удалось сохранить сессию.' });
+      response.status(201).json({ user: publicUser(guestUser) });
+    });
+  });
+});
+
 app.get('/api/me', requireAuth, (request, response) => {
   response.json({ user: publicUser(request.user) });
 });
@@ -208,8 +237,9 @@ function detachPartner(socket, notify = true) {
 
 io.engine.use(sessionMiddleware);
 io.use((socket, next) => {
-  if (!socket.request.session?.userId) return next(new Error('AUTH_REQUIRED'));
-  socket.userId = socket.request.session.userId;
+  const session = socket.request.session;
+  if (!session?.userId && !session?.guestUser) return next(new Error('AUTH_REQUIRED'));
+  socket.userId = session.userId || session.guestUser.id;
   next();
 });
 
