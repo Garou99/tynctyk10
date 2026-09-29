@@ -1,0 +1,18 @@
+{
+  "name": "vstrecha-video-chat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Случайный видеочат с регистрацией, подбором собеседников и WebRTC.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "socket.io": "^4.8.1"
+  }
+}
