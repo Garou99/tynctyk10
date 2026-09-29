@@ -279,7 +279,7 @@ function connectSocket() {
     setConnectionStatus('СОЕДИНЯЕМ ВАС');
     updateNextButton();
     try {
-      makePeerConnection();
+      await makePeerConnection();
       if (initiator) {
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
