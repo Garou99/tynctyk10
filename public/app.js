@@ -188,10 +188,11 @@ function clearPeer() {
   remoteStatus.textContent = 'Собеседник появится здесь';
 }
 
-function makePeerConnection() {
+async function makePeerConnection() {
   clearPeer();
+  const { iceServers } = await api('/api/ice-servers');
   peerConnection = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    iceServers,
   });
   localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
   peerConnection.ontrack = (event) => {
@@ -286,7 +287,7 @@ function connectSocket() {
       }
     } catch (error) {
       console.error('Could not start WebRTC:', error);
-      showToast('Браузер не смог начать видеосвязь. Попробуйте ещё раз.');
+      showToast(error.message || 'Браузер не смог начать видеосвязь. Попробуйте ещё раз.');
       setConnectionStatus('НЕ УДАЛОСЬ СОЕДИНИТЬСЯ');
     }
   });
